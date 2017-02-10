@@ -2,7 +2,10 @@
 
 class graph:
 	def __init__(self):
+		nodeDict={}
 
+	def addNode(self, name):
+		nodeDict[name] = node(name)
 
 
 
