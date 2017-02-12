@@ -1,4 +1,10 @@
-##Class:  Graph
+import math
+import matplotlib.pyplot as plt
+
+###############################
+
+##Classes
+###############################
 
 class graph:
 	def __init__(self):
@@ -14,17 +20,18 @@ class graph:
 
 		#put edges into graph
 		m = len(paper.authors)
-		for i in range(0, m):
+		for i in range(0, m-1):
 			for j in range(i+1, m):
 				A1 = paper.authors[i]
 				A2 = paper.authors[j]
-				edge = frozenset([A1, A2])
-				if edge not in self.edgeSet:
-					self.edgeSet.add(edge)
+				if A1 != A2:
+					edge = frozenset([A1, A2])
+					if edge not in self.edgeSet:
+						self.edgeSet.add(edge)
 					
 					#also update nodes for neighbours if new edge
-					self.nodeDict[A1].addNeighbour(A2)
-					self.nodeDict[A2].addNeighbour(A1)
+						self.nodeDict[A1].addNeighbour(A2)
+						self.nodeDict[A2].addNeighbour(A1)
 		
 
 
@@ -32,11 +39,12 @@ class graph:
 class node:
 	def __init__(self, name):
 		self.name = name
-		self.neighbours = [] 
+		self.neighbours = set() 
 		self.degree = 0 
 
 	def addNeighbour(self, neighbour):
-		self.neighbours.append(neighbour)
+		#since edge isn't there yet, this has to be a new neighbour
+		self.neighbours.add(neighbour)
 		self.degree = self.degree +1
 
 class paper:
@@ -46,6 +54,11 @@ class paper:
 		self.authors = authors
 		self.title = title
 
+
+#########################
+
+#functions
+#########################
 
 
 def readPapers(g):
@@ -100,11 +113,12 @@ def questionOne(G):
 		else:
 			listOfDegree[i] = 0
 
-	return listOfDegree
+	return maxDegree, listOfDegree
 
+########################
 
 #main
-  
+########################  
 if __name__ == "__main__":
 
 	f = open("hw1solution.txt", 'w')
@@ -120,12 +134,29 @@ if __name__ == "__main__":
 		G.buildGraph(paper)	
 	 
 
-	degreeCount = questionOne(G)
-	print degreeCount
-	print sum(degreeCount)
-	print len(G.nodeDict)
-	print len(G.edgeSet)
-	
+	####################
+	#Question 1:
+	(maxD, degreeCount) = questionOne(G)
+	for i in range(0, maxD+1):
+		f.write("@ 1 "+ str(i) + " " + str(degreeCount[i])+ "\n")
+		
+	#set up scatterplot
+	x=[]
+	y=[]
+	for i in range(1, maxD+1):
+		if degreeCount[i]!=0:
+			x.append(math.log(i))
+			y.append(math.log(degreeCount[i]))
+
+	fig = plt.figure()
+	plt.xlabel("Log of degree")
+	plt.ylabel("Log of number of nodes")
+	plt.title("Question 1:  Log-degree Log-Nodes Plot")
+	plt.plot(x, y)
+	fig.savefig("plot1.png")
+	plt.close(fig)
+
+	#######################
 
 	f.close
 	paperF.close	 
