@@ -2,10 +2,30 @@
 
 class graph:
 	def __init__(self):
-		nodeDict={}
+		self.nodeDict={}
+		self.edgeSet = set()
 
-	def addNode(self, name):
-		nodeDict[name] = node(name)
+	def buildGraph(self, paper):
+		#put nodes into graph
+		for a in paper.authors:
+			if a not in self.nodeDict:
+				newNode = node(a)
+				self.nodeDict[a] = newNode
+
+		#put edges into graph
+		m = len(paper.authors)
+		for i in range(0, m):
+			for j in range(i+1, m):
+				A1 = paper.authors[i]
+				A2 = paper.authors[j]
+				edge = frozenset([A1, A2])
+				if edge not in self.edgeSet:
+					self.edgeSet.add(edge)
+					
+					#also update nodes for neighbours if new edge
+					self.nodeDict[A1].addNeighbour(A2)
+					self.nodeDict[A2].addNeighbour(A1)
+		
 
 
 
@@ -13,10 +33,11 @@ class node:
 	def __init__(self, name):
 		self.name = name
 		self.neighbours = [] 
+		self.degree = 0 
 
-	def addNeighbour(self, neighbourName):
-		self.neighbours.add(neighbourName)
-
+	def addNeighbour(self, neighbour):
+		self.neighbours.append(neighbour)
+		self.degree = self.degree +1
 
 class paper:
 	def __init__(self, traits):
@@ -32,9 +53,7 @@ def readPapers(g):
 
 	while True:
 		try:
-			print('ok')
 			line = g.readline().strip().split(",")
-			print line
 			title = line[1]
 		
 			line = line[0].strip("(Ed.)").split("&")  #after removing author
@@ -61,6 +80,27 @@ def readPapers(g):
 	return listOfPaper		
 	
 
+def questionOne(G):
+	tempDict = {}
+
+	for x in G.nodeDict:
+		degree = G.nodeDict[x].degree
+		if degree in tempDict:
+			tempDict[degree] = tempDict[degree]+1
+		else:
+			tempDict[degree] = 1
+
+	maxDegree = max(tempDict)
+	listOfDegree = [0 for i in range(0, maxDegree+1)]
+
+	for i in range(0, maxDegree+1):
+		if i in tempDict:
+			listOfDegree[i] = tempDict[i]
+
+		else:
+			listOfDegree[i] = 0
+
+	return listOfDegree
 
 
 #main
@@ -72,10 +112,20 @@ if __name__ == "__main__":
 
 	paperF = open("HW1_data.txt", "r")
 	listOfPaper = readPapers(paperF)
-	print len(listOfPaper)
 	listOfPaper = filter(lambda x: 1985<= x.year <=2005, listOfPaper)
 
+
+	G= graph()
+	for paper in listOfPaper:
+		G.buildGraph(paper)	
 	 
+
+	degreeCount = questionOne(G)
+	print degreeCount
+	print sum(degreeCount)
+	print len(G.nodeDict)
+	print len(G.edgeSet)
+	
 
 	f.close
 	paperF.close	 
