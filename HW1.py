@@ -156,11 +156,36 @@ def BFS(v, verticesChecked):
 		
 #############################
 
-def distance(root, component):
+def questionThree(root):
+	distanceDict = BFSDistance(root)
+
+	distances = [distanceDict[x] for x in distanceDict]
+	maxDist = max(distances)
+	distanceCount = []
+
+	for j in range(0, maxDist+1):
+		r_j = len(filter(lambda x: x == j, distances))
+		distanceCount.append(r_j)
+
+	return (maxDist, distanceCount, distances)
+
+
+def BFSDistance(root):
+
+	distDict = {} 
 	distDict[root.name] = 0
 
+	toCheck = [root]
 
+	while toCheck:
+		u = toCheck.pop(0)
+		
+		for w in u.neighbours:
+			if w.name not in distDict:
+				distDict[w.name] = distDict[u.name]+1
+				toCheck.append(w)
 
+	return distDict	
 
 
 
@@ -265,14 +290,31 @@ if __name__ == "__main__":
 	#Question 3
 	
 	root = G.nodeDict["Hartmanis"]
-	rootComp = filter(lambda x: root in x, components)[0]
 	
-	distanceDict = distance(root, rootComp) 
+	(maxDist, distCount, distances) = questionThree(root) 
+	for j in range(1, maxDist+1):
+		f.write("@ 3 " + str(j) + " " + str( distCount[j]) + "\n")
+
+		
+	bins = [i for i in range(1, maxDist+1)]
+
+	print bins
+	#print distances	
+	fig = plt.figure()
+	plt.xlabel("Distance from Hartmanis")
+	plt.ylabel("Number of nodes at this distance")
+	plt.title("Question 3:  Count of distance from Hartmanis")
+	plt.hist(distances, bins)
+	fig.savefig("plot3.png")
+	plt.close(fig)
 
 
+	####
+	#Q3 checker
 
-
-
+	#rootComp = filter(lambda x: root in x, components)[0]
+	#print len(rootComp) == sum(distCount) + 1
+	
 
 	f.close
 	paperF.close	 
