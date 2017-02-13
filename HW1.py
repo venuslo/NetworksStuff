@@ -100,7 +100,7 @@ def readPapers(g):
 	
 	return listOfPaper		
 	
-
+############################################
 def questionOne(G):
 	tempDict = {}
 
@@ -167,7 +167,7 @@ def questionThree(root):
 		r_j = len(filter(lambda x: x == j, distances))
 		distanceCount.append(r_j)
 
-	return (maxDist, distanceCount, distances)
+	return (maxDist, distanceCount, distances, distanceDict)
 
 
 def BFSDistance(root):
@@ -189,6 +189,21 @@ def BFSDistance(root):
 
 
 
+
+def questionFour(maxDist, distDict, distCount):
+
+	potentParent = [0 for i in range(1, maxDist+1)]
+
+	for v in distDict:
+		neighboursOfV = G.nodeDict[v].neighbours
+		parents = filter(lambda x: distDict[x.name] == distDict[v] -1, neighboursOfV)
+		potentParent[distDict[v]-1] = potentParent[distDict[v]-1] + len(parents)
+	
+
+	listOfP_j = [round(potentParent[i]* 1.0 / distCount[i], 3) for i in range(0, maxDist)]
+	
+	return listOfP_j	
+	
 ########################
 
 #main
@@ -291,15 +306,12 @@ if __name__ == "__main__":
 	
 	root = G.nodeDict["Hartmanis"]
 	
-	(maxDist, distCount, distances) = questionThree(root) 
+	(maxDist, distCount, distances, distDict) = questionThree(root) 
 	for j in range(1, maxDist+1):
 		f.write("@ 3 " + str(j) + " " + str( distCount[j]) + "\n")
 
-		
 	bins = [i for i in range(1, maxDist+1)]
 
-	print bins
-	#print distances	
 	fig = plt.figure()
 	plt.xlabel("Distance from Hartmanis")
 	plt.ylabel("Number of nodes at this distance")
@@ -315,6 +327,24 @@ if __name__ == "__main__":
 	#rootComp = filter(lambda x: root in x, components)[0]
 	#print len(rootComp) == sum(distCount) + 1
 	
+
+
+	##############################
+	#Question 4
+	distCount.pop(0)
+	listOfP_j = questionFour(maxDist, distDict, distCount)
+
+	for j in range(1, maxDist+1):
+		f.write("@ 4 " + str(j) + " " + str(listOfP_j[j-1]) + "\n")
+
+		
+	fig = plt.figure()
+	plt.xlabel("Distance from Hartmanis")
+	plt.ylabel("Average number of parents")
+	plt.title("Question 4:  Average number of parents on BFS rooted on Hartmanis")
+	plt.bar(bins, listOfP_j, align = 'center')
+	fig.savefig("plot4.png")
+	plt.close(fig)
 
 	f.close
 	paperF.close	 
