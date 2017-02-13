@@ -65,10 +65,14 @@ def readPapers(g):
 	listOfPaper = []
 
 	while True:
-		try:
-			line = g.readline().strip().split(",")
+		try:#see if there is a line to read
+			line = g.readline()
+	
+
+			line = line.strip().split(",")
+	
 			title = line[1]
-		
+	
 			line = line[0].strip("(Ed.)").split("&")  #after removing author
 			m = len(line)
 
@@ -88,8 +92,12 @@ def readPapers(g):
 			listOfPaper.append(x)
 
 		except:
-			break
-
+			if len(line[0])<=2:
+				break
+			else:
+#				print line
+				pass	
+	
 	return listOfPaper		
 	
 
@@ -121,25 +129,39 @@ def questionTwo(G):
 	verticesChecked = set()
 
 	if G.nodeDict: #i.e. if not empty, then we have at least 1 comp
-		currentComp = set()
 		for v in G.nodeDict:
 			if G.nodeDict[v] not in verticesChecked:
-				(verticesChecked, currentComp) = BFS(G.nodeDict[v], currentComp, verticesChecked)
+				(verticesChecked, currentComp) = BFS(G.nodeDict[v], verticesChecked)
 				listOfComp.append(currentComp)
-				currentComp = set()
+				
 
 	return listOfComp
 	
 
-def BFS(v, currentComp, verticesChecked):
-	currentComp.add(v)
+def BFS(v, verticesChecked):
+	currentComp={v}
 	verticesChecked.add(v)
-	for u in v.neighbours:
-		if u not in verticesChecked:
-			(verticesChecked, currentComp) = BFS(u, currentComp, verticesChecked)
-	
+
+	toCheck = [v]
+	while toCheck:
+		u = toCheck.pop(0)
+
+		for w in u.neighbours:
+			if w not in verticesChecked:
+				currentComp.add(w)		
+				verticesChecked.add(w)
+				toCheck.append(w)
+
 	return (verticesChecked, currentComp)
 		
+#############################
+
+def distance(root, component):
+	distDict[root.name] = 0
+
+
+
+
 
 
 ########################
@@ -185,6 +207,17 @@ if __name__ == "__main__":
 	fig.savefig("plot1.png")
 	plt.close(fig)
 
+	#############
+	#Q1 checker take logs first
+#	total =0
+#	for i in range(0, len(x)):
+#		total = x[i]*y[i]+ total
+#	total = total/2.0
+#
+#	print "Q1 check edges" + str(total)
+
+
+
 	#########################
 	#Question 2
 
@@ -194,7 +227,7 @@ if __name__ == "__main__":
 	maxComp = max(sizeOfComp)
 	ratioComp = round(maxComp*1.0/numOfNodes, 3)
 
-	f.write("@ 2 " + str(maxComp) + " " + str(numOfNodes) + " " + str(ratioComp))
+	f.write("@ 2 " + str(maxComp) + " " + str(numOfNodes) + " " + str(ratioComp)+ "\n")
 
 	cStar = max(filter(lambda x: x < maxComp, sizeOfComp)) #look at everything smaller than max
 
@@ -203,7 +236,7 @@ if __name__ == "__main__":
 	y=[]
 	for j in range(1, cStar+1):
 		k_j = len(filter(lambda x: x==j, sizeOfComp))
-		f.write("@ 2 " + str(j) + " " + str(k_j))
+		f.write("@ 2 " + str(j) + " " + str(k_j)+"\n")
 	
 		if k_j!=0:
 			x.append(math.log(j))
@@ -217,7 +250,29 @@ if __name__ == "__main__":
 	fig.savefig("plot2.png")
 	plt.close(fig)
 	
+	#########
+	#Q2 checker take logs first
+	#total = maxComp
+	#for i in range(0, len(x)):
+	#	total = total + x[i]*y[i]
+	
+
+	#print "Q2 check nodes" + str(total) 
+
+
+
 	#######################
+	#Question 3
+	
+	root = G.nodeDict["Hartmanis"]
+	rootComp = filter(lambda x: root in x, components)[0]
+	
+	distanceDict = distance(root, rootComp) 
+
+
+
+
+
 
 	f.close
 	paperF.close	 
