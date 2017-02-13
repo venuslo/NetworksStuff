@@ -30,8 +30,8 @@ class graph:
 						self.edgeSet.add(edge)
 					
 					#also update nodes for neighbours if new edge
-						self.nodeDict[A1].addNeighbour(A2)
-						self.nodeDict[A2].addNeighbour(A1)
+						self.nodeDict[A1].addNeighbour(self.nodeDict[A2])
+						self.nodeDict[A2].addNeighbour(self.nodeDict[A1])
 		
 
 
@@ -115,6 +115,33 @@ def questionOne(G):
 
 	return maxDegree, listOfDegree
 
+###########################################
+def questionTwo(G):
+	listOfComp = []
+	verticesChecked = set()
+
+	if G.nodeDict: #i.e. if not empty, then we have at least 1 comp
+		currentComp = set()
+		for v in G.nodeDict:
+			if G.nodeDict[v] not in verticesChecked:
+				(verticesChecked, currentComp) = BFS(G.nodeDict[v], currentComp, verticesChecked)
+				listOfComp.append(currentComp)
+				currentComp = set()
+
+	return listOfComp
+	
+
+def BFS(v, currentComp, verticesChecked):
+	currentComp.add(v)
+	verticesChecked.add(v)
+	for u in v.neighbours:
+		if u not in verticesChecked:
+			(verticesChecked, currentComp) = BFS(u, currentComp, verticesChecked)
+	
+	return (verticesChecked, currentComp)
+		
+
+
 ########################
 
 #main
@@ -133,6 +160,8 @@ if __name__ == "__main__":
 	for paper in listOfPaper:
 		G.buildGraph(paper)	
 	 
+	numOfNodes = len(G.nodeDict)
+	numOfEdges = len(G.edgeSet)
 
 	####################
 	#Question 1:
@@ -156,7 +185,44 @@ if __name__ == "__main__":
 	fig.savefig("plot1.png")
 	plt.close(fig)
 
+	#########################
+	#Question 2
+
+	components = questionTwo(G)
+	sizeOfComp = map(lambda x: len(x), components)
+
+	maxComp = max(sizeOfComp)
+	ratioComp = round(maxComp*1.0/numOfNodes, 3)
+
+	f.write("@ 2 " + str(maxComp) + " " + str(numOfNodes) + " " + str(ratioComp))
+
+	cStar = max(filter(lambda x: x < maxComp, sizeOfComp)) #look at everything smaller than max
+
+	#output and set up scatterplot
+	x=[]
+	y=[]
+	for j in range(1, cStar+1):
+		k_j = len(filter(lambda x: x==j, sizeOfComp))
+		f.write("@ 2 " + str(j) + " " + str(k_j))
+	
+		if k_j!=0:
+			x.append(math.log(j))
+			y.append(math.log(k_j))
+
+	fig = plt.figure()
+	plt.xlabel("Log of component size")
+	plt.ylabel("Log of number of components")
+	plt.title("Question 2:  Log-component size vs Log-Num of components")
+	plt.plot(x, y)
+	fig.savefig("plot2.png")
+	plt.close(fig)
+	
 	#######################
 
 	f.close
 	paperF.close	 
+
+	#checks
+	print "nodes" + str(numOfNodes)
+	print "edges" + str(numOfEdges)
+	print "isolated" + str(degreeCount[0])
