@@ -63,7 +63,7 @@ class paper:
 
 def readPapers(g):
 	listOfPaper = []
-
+	error =0
 	while True:
 		try:#see if there is a line to read
 			line = g.readline()
@@ -93,9 +93,11 @@ def readPapers(g):
 
 		except:
 			if len(line[0])<=2:
+				print "# of errors: " + str(error)
 				break
 			else:
-#				print line
+				print line
+				error = error +1
 				pass	
 	
 	return listOfPaper		
